@@ -1,0 +1,41 @@
+{
+  "users": [
+    {
+      "id": "bdhvos8vcrc",
+      "email": "test@example.com",
+      "passwordHash": "$2b$12$m/xYfABs0NamEQA/97HrCe1EAlfu/3g2puA5uEx4ePH6iu/Q7Uple",
+      "masterSalt": "c13905b38165090970c8d7e1b986486e",
+      "role": "USER",
+      "isActive": true,
+      "createdAt": "2026-02-22T20:20:22.092Z",
+      "updatedAt": "2026-02-22T20:20:22.092Z",
+      "lastLogin": null
+    }
+  ],
+  "passwords": [],
+  "documents": [],
+  "notes": [],
+  "activityLogs": [
+    {
+      "id": "0n8yvjpszeo",
+      "userId": "bdhvos8vcrc",
+      "action": "REGISTRATION",
+      "ipAddress": "::1",
+      "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.7705",
+      "success": true,
+      "timestamp": "2026-02-22T20:20:22.093Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "bmun92q17wt",
+      "userId": "bdhvos8vcrc",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiZGh2b3M4dmNyYyIsImlhdCI6MTc3MTc5MTYyMiwiZXhwIjoxNzcyMzk2NDIyfQ.Xdghq6MOxX5waFI9M6DJ9hC0YRLNmMxkBtN2VX2rVsU",
+      "device": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.7705",
+      "ipAddress": "::1",
+      "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.7705",
+      "expiresAt": "2026-03-01T20:20:22.103Z",
+      "createdAt": "2026-02-22T20:20:22.104Z"
+    }
+  ]
+}

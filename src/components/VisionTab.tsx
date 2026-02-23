@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { ModelCategory } from '@runanywhere/web';
-import { VideoCapture, VLMWorkerBridge } from '@runanywhere/web-llamacpp';
-import { useModelLoader } from '../hooks/useModelLoader';
-import { ModelBanner } from './ModelBanner';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ModelCategory } from "@runanywhere/web";
+import { VideoCapture, VLMWorkerBridge } from "@runanywhere/web-llamacpp";
+import { useModelLoader } from "../hooks/useModelLoader";
+import { ModelBanner } from "./ModelBanner";
 
 const LIVE_INTERVAL_MS = 2500;
 const LIVE_MAX_TOKENS = 30;
@@ -21,7 +21,7 @@ export function VisionTab() {
   const [liveMode, setLiveMode] = useState(false);
   const [result, setResult] = useState<VisionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState('Describe what you see briefly.');
+  const [prompt, setPrompt] = useState("Describe what you see briefly.");
 
   const videoMountRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<VideoCapture | null>(null);
@@ -42,15 +42,15 @@ export function VisionTab() {
     setError(null);
 
     try {
-      const cam = new VideoCapture({ facingMode: 'environment' });
+      const cam = new VideoCapture({ facingMode: "environment" });
       await cam.start();
       captureRef.current = cam;
 
       const mount = videoMountRef.current;
       if (mount) {
         const el = cam.videoElement;
-        el.style.width = '100%';
-        el.style.borderRadius = '12px';
+        el.style.width = "100%";
+        el.style.borderRadius = "12px";
         mount.appendChild(el);
       }
 
@@ -58,14 +58,17 @@ export function VisionTab() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
 
-      if (msg.includes('NotAllowed') || msg.includes('Permission')) {
+      if (msg.includes("NotAllowed") || msg.includes("Permission")) {
         setError(
-          'Camera permission denied. On macOS, check System Settings → Privacy & Security → Camera and ensure your browser is allowed.',
+          "Camera permission denied. On macOS, check System Settings → Privacy & Security → Camera and ensure your browser is allowed.",
         );
-      } else if (msg.includes('NotFound') || msg.includes('DevicesNotFound')) {
-        setError('No camera found on this device.');
-      } else if (msg.includes('NotReadable') || msg.includes('TrackStartError')) {
-        setError('Camera is in use by another application.');
+      } else if (msg.includes("NotFound") || msg.includes("DevicesNotFound")) {
+        setError("No camera found on this device.");
+      } else if (
+        msg.includes("NotReadable") ||
+        msg.includes("TrackStartError")
+      ) {
+        setError("Camera is in use by another application.");
       } else {
         setError(`Camera error: ${msg}`);
       }
@@ -88,58 +91,65 @@ export function VisionTab() {
   // ------------------------------------------------------------------
   // Core: capture + infer
   // ------------------------------------------------------------------
-  const describeFrame = useCallback(async (maxTokens: number) => {
-    if (processingRef.current) return;
+  const describeFrame = useCallback(
+    async (maxTokens: number) => {
+      if (processingRef.current) return;
 
-    const cam = captureRef.current;
-    if (!cam?.isCapturing) return;
+      const cam = captureRef.current;
+      if (!cam?.isCapturing) return;
 
-    // Ensure model loaded
-    if (loader.state !== 'ready') {
-      const ok = await loader.ensure();
-      if (!ok) return;
-    }
-
-    const frame = cam.captureFrame(CAPTURE_DIM);
-    if (!frame) return;
-
-    setProcessing(true);
-    processingRef.current = true;
-    setError(null);
-
-    const t0 = performance.now();
-
-    try {
-      const bridge = VLMWorkerBridge.shared;
-      if (!bridge.isModelLoaded) {
-        throw new Error('VLM model not loaded in worker');
+      // Ensure model loaded
+      if (loader.state !== "ready") {
+        const ok = await loader.ensure();
+        if (!ok) return;
       }
 
-      const res = await bridge.process(
-        frame.rgbPixels,
-        frame.width,
-        frame.height,
-        prompt,
-        { maxTokens, temperature: 0.6 },
-      );
+      const frame = cam.captureFrame(CAPTURE_DIM);
+      if (!frame) return;
 
-      setResult({ text: res.text, totalMs: performance.now() - t0 });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const isWasmCrash = msg.includes('memory access out of bounds')
-        || msg.includes('RuntimeError');
+      setProcessing(true);
+      processingRef.current = true;
+      setError(null);
 
-      if (isWasmCrash) {
-        setResult({ text: 'Recovering from memory error... next frame will retry.', totalMs: 0 });
-      } else {
-        setError(msg);
-        if (liveModeRef.current) stopLive();
+      const t0 = performance.now();
+
+      try {
+        const bridge = VLMWorkerBridge.shared;
+        if (!bridge.isModelLoaded) {
+          throw new Error("VLM model not loaded in worker");
+        }
+
+        const res = await bridge.process(
+          frame.rgbPixels,
+          frame.width,
+          frame.height,
+          prompt,
+          { maxTokens, temperature: 0.6 },
+        );
+
+        setResult({ text: res.text, totalMs: performance.now() - t0 });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const isWasmCrash =
+          msg.includes("memory access out of bounds") ||
+          msg.includes("RuntimeError");
+
+        if (isWasmCrash) {
+          setResult({
+            text: "Recovering from memory error... next frame will retry.",
+            totalMs: 0,
+          });
+        } else {
+          setError(msg);
+          if (liveModeRef.current) stopLive();
+        }
+      } finally {
+        setProcessing(false);
+        processingRef.current = false;
       }
-    } finally {
-      setProcessing(false);
-      processingRef.current = false;
-    }
-  }, [loader, prompt]);
+    },
+    [loader, prompt],
+  );
 
   // ------------------------------------------------------------------
   // Single-shot
@@ -207,7 +217,7 @@ export function VisionTab() {
       <div className="vision-camera">
         {!cameraActive && (
           <div className="empty-state">
-            <h3>📷 Camera Preview</h3>
+            <h3>Camera Preview</h3>
             <p>Tap below to start the camera</p>
           </div>
         )}
@@ -225,7 +235,9 @@ export function VisionTab() {
 
       <div className="vision-actions">
         {!cameraActive ? (
-          <button className="btn btn-primary" onClick={startCamera}>Start Camera</button>
+          <button className="btn btn-primary" onClick={startCamera}>
+            Start Camera
+          </button>
         ) : (
           <>
             <button
@@ -233,14 +245,14 @@ export function VisionTab() {
               onClick={describeSingle}
               disabled={processing || liveMode}
             >
-              {processing && !liveMode ? 'Analyzing...' : 'Describe'}
+              {processing && !liveMode ? "Analyzing..." : "Describe"}
             </button>
             <button
-              className={`btn ${liveMode ? 'btn-live-active' : ''}`}
+              className={`btn ${liveMode ? "btn-live-active" : ""}`}
               onClick={toggleLive}
               disabled={processing && !liveMode}
             >
-              {liveMode ? '⏹ Stop Live' : '▶ Live'}
+              {liveMode ? "Stop Live" : "Start Live"}
             </button>
           </>
         )}
@@ -258,7 +270,9 @@ export function VisionTab() {
           <h4>Result</h4>
           <p>{result.text}</p>
           {result.totalMs > 0 && (
-            <div className="message-stats">{(result.totalMs / 1000).toFixed(1)}s</div>
+            <div className="message-stats">
+              {(result.totalMs / 1000).toFixed(1)}s
+            </div>
           )}
         </div>
       )}

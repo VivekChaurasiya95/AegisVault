@@ -5,3 +5,8 @@ dist/
 *.tsbuildinfo
 .playwright-mcp/
 *.png
+
+# environment
+.env
+# mock database
+server/mock-db.json
